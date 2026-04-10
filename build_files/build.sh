@@ -45,7 +45,6 @@ dnf5 install -y \
   fprintd-pam \
   tmux
 
-mkdir -p /usr/local/bin
 install -m0755 /ctx/kanata /usr/local/bin/kanata
 
 groupadd --system uinput || true
