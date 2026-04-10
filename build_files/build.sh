@@ -1,8 +1,36 @@
 #!/bin/bash
-
 set -ouex pipefail
 
-# Core session stack
+echo "=== REPOS ==="
+dnf5 repolist --all || true
+
+echo "=== INSTALLED RELEASE PACKAGES ==="
+rpm -q terra-release || true
+
+echo "=== CHECK KANATA BUILD CONTEXT ==="
+ls -l /ctx || true
+test -f /ctx/kanata
+
+# Add Terra only if the terra repo is not already present
+if ! dnf5 repolist --all | awk '{print $1}' | grep -qx terra; then
+  dnf5 install -y --nogpgcheck \
+    --repofrompath="terra,https://repos.fyralabs.com/terra\$releasever" \
+    terra-release
+fi
+
+echo "=== VERIFY PACKAGE AVAILABILITY ==="
+dnf5 repoquery niri || true
+dnf5 repoquery noctalia-shell || true
+dnf5 repoquery kitty || true
+dnf5 repoquery kanshi || true
+dnf5 repoquery xwayland-satellite || true
+dnf5 repoquery xdg-desktop-portal-gtk || true
+dnf5 repoquery wl-clipboard || true
+dnf5 repoquery cliphist || true
+dnf5 repoquery brightnessctl || true
+dnf5 repoquery fprintd || true
+dnf5 repoquery fprintd-pam || true
+
 dnf5 install -y \
   niri \
   noctalia-shell \
@@ -17,10 +45,8 @@ dnf5 install -y \
   fprintd-pam \
   tmux
 
-# Install vendored Kanata binary from build context
 install -Dm0755 /ctx/kanata /usr/local/bin/kanata
 
-# Kanata host plumbing
 groupadd --system uinput || true
 
 cat >/etc/udev/rules.d/99-input.rules <<'EOF'
@@ -28,15 +54,3 @@ KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"
 EOF
 
 echo uinput >/etc/modules-load.d/uinput.conf
-
-# Uncomment only if you verify you need them in the Niri session:
-#
-# dnf5 install -y \
-#   xdg-desktop-portal-gnome \
-#   gnome-keyring \
-#   nautilus
-
-# Optional later:
-#
-# dnf5 install -y \
-#   wf-recorder
