@@ -2,23 +2,53 @@
 
 set -ouex pipefail
 
-### Install packages
+# Add Terra for Noctalia on Fedora
+dnf5 install -y --nogpgcheck \
+  --repofrompath="terra,https://repos.fyralabs.com/terra\$releasever" \
+  terra-release
 
-# Packages can be installed from any enabled yum repo on the image.
-# RPMfusion repos are available by default in ublue main images
-# List of rpmfusion packages can be found here:
-# https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/43/x86_64/repoview/index.html&protocol=https&redirect=1
+# Core session stack
+dnf5 install -y \
+  niri \
+  noctalia-shell \
+  kitty \
+  kanshi \
+  xwayland-satellite \
+  xdg-desktop-portal-gtk \
+  wl-clipboard \
+  cliphist \
+  brightnessctl \
+  fprintd \
+  fprintd-pam \
+  tmux
 
-# this installs a package from fedora repos
-dnf5 install -y tmux 
+# Install vendored Kanata binary from build context
+install -Dm0755 /ctx/kanata /usr/local/bin/kanata
 
-# Use a COPR Example:
+# Kanata host plumbing
+groupadd --system uinput || true
+
+cat >/etc/udev/rules.d/99-input.rules <<'EOF'
+KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"
+EOF
+
+echo uinput >/etc/modules-load.d/uinput.conf
+
+# Usually already present on Bluefin DX / GNOME base.
+# Uncomment only if you verify you need them in the Niri session.
 #
-# dnf5 -y copr enable ublue-os/staging
-# dnf5 -y install package
-# Disable COPRs so they don't end up enabled on the final image:
-# dnf5 -y copr disable ublue-os/staging
+# dnf5 install -y \
+#   xdg-desktop-portal-gnome \
+#   gnome-keyring \
+#   nautilus
 
-#### Example for enabling a System Unit File
+# Optional later:
+#
+# dnf5 install -y \
+#   wf-recorder
 
-systemctl enable podman.socket
+# Intentionally omitted from v1:
+# - grim / slurp      # Niri has built-in screenshot UI/actions
+# - hypridle          # avoid cross-ecosystem overlap
+# - wireplumber       # likely already part of the GNOME/Bluefin base
+# - polkit-gnome      # test first; GNOME base usually already covers this
