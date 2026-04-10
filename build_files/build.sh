@@ -30,6 +30,9 @@ dnf5 repoquery cliphist || true
 dnf5 repoquery brightnessctl || true
 dnf5 repoquery fprintd || true
 dnf5 repoquery fprintd-pam || true
+dnf5 repoquery fd-find || true
+dnf5 repoquery fzf || true
+dnf5 repoquery ripgrep || true
 
 dnf5 install -y \
   niri \
@@ -43,7 +46,12 @@ dnf5 install -y \
   brightnessctl \
   fprintd \
   fprintd-pam \
-  tmux
+  tmux \
+  fd-find \
+  fzf \
+  ripgrep
+
+dnf5 clean all
 
 install -m0755 /ctx/kanata /usr/bin/kanata
 
