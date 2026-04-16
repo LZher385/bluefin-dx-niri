@@ -33,6 +33,7 @@ dnf5 repoquery fprintd-pam || true
 dnf5 repoquery fd-find || true
 dnf5 repoquery fzf || true
 dnf5 repoquery ripgrep || true
+dnf5 repoquery swayidle || true
 
 dnf5 install -y \
   niri \
@@ -49,7 +50,8 @@ dnf5 install -y \
   tmux \
   fd-find \
   fzf \
-  ripgrep
+  ripgrep \
+  swayidle
 
 dnf5 clean all
 
