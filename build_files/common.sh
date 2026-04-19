@@ -34,6 +34,23 @@ dnf5 makecache --refresh -y || true
 # dnf5 repoquery fzf || true
 # dnf5 repoquery ripgrep || true
 # dnf5 repoquery swayidle || true
+echo "=== OS RELEASE ==="
+cat /etc/os-release || true
+
+echo "=== FEDORA RELEASE MACRO ==="
+rpm -E '%fedora' || true
+
+echo "=== ENABLED REPOS ==="
+dnf5 repolist --enabled || true
+
+echo "=== TERRA RELEASE PACKAGE ==="
+rpm -qi terra-release || true
+
+echo "=== NOCTALIA QUERY ==="
+dnf5 repoquery --available noctalia-shell || true
+
+echo "=== CLIPHIST QUERY ==="
+dnf5 repoquery --available cliphist || true
 
 dnf5 install -y \
   niri \
