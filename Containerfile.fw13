@@ -1,0 +1,13 @@
+FROM scratch AS ctx
+COPY build_files /
+COPY build_files/kanata /kanata
+
+FROM ghcr.io/ublue-os/bluefin-dx:stable
+
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
+    --mount=type=cache,dst=/var/cache \
+    --mount=type=cache,dst=/var/log \
+    --mount=type=tmpfs,dst=/tmp \
+    /ctx/common.sh && /ctx/fw13.sh
+
+RUN bootc container lint
