@@ -18,20 +18,22 @@ if ! dnf5 repolist --all | awk '{print $1}' | grep -qx terra; then
     terra-release
 fi
 
-echo "=== VERIFY PACKAGE AVAILABILITY ==="
-dnf5 repoquery niri || true
-dnf5 repoquery noctalia-shell || true
-dnf5 repoquery kitty || true
-dnf5 repoquery kanshi || true
-dnf5 repoquery xwayland-satellite || true
-dnf5 repoquery xdg-desktop-portal-gtk || true
-dnf5 repoquery wl-clipboard || true
-dnf5 repoquery cliphist || true
-dnf5 repoquery brightnessctl || true
-dnf5 repoquery fd-find || true
-dnf5 repoquery fzf || true
-dnf5 repoquery ripgrep || true
-dnf5 repoquery swayidle || true
+dnf5 makecache --refresh -y || true
+
+# echo "=== VERIFY PACKAGE AVAILABILITY ==="
+# dnf5 repoquery niri || true
+# dnf5 repoquery noctalia-shell || true
+# dnf5 repoquery kitty || true
+# dnf5 repoquery kanshi || true
+# dnf5 repoquery xwayland-satellite || true
+# dnf5 repoquery xdg-desktop-portal-gtk || true
+# dnf5 repoquery wl-clipboard || true
+# dnf5 repoquery cliphist || true
+# dnf5 repoquery brightnessctl || true
+# dnf5 repoquery fd-find || true
+# dnf5 repoquery fzf || true
+# dnf5 repoquery ripgrep || true
+# dnf5 repoquery swayidle || true
 
 dnf5 install -y \
   niri \
