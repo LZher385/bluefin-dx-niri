@@ -1,58 +1,19 @@
 #!/bin/bash
-set -ouex pipefail
+set -euxo pipefail
 
-echo "=== REPOS ==="
-dnf5 repolist --all || true
+KANATA_VERSION="v1.11.0"
+KANATA_SHA256="d9f634afb4c7f078cc2aacf3998fd65b432d4d83296cc48a89f941525459b4e2"
 
-echo "=== INSTALLED RELEASE PACKAGES ==="
-rpm -q terra-release || true
-
-echo "=== CHECK KANATA BUILD CONTEXT ==="
-ls -l /ctx || true
-test -f /ctx/kanata
-
-# Add Terra only if the terra repo is not already present
+# Add Terra only if not already present
 if ! dnf5 repolist --all | awk '{print $1}' | grep -qx terra; then
   dnf5 install -y --nogpgcheck \
     --repofrompath="terra,https://repos.fyralabs.com/terra\$releasever" \
     terra-release
 fi
 
-dnf5 makecache --refresh -y || true
+dnf5 makecache --refresh -y
 
-# echo "=== VERIFY PACKAGE AVAILABILITY ==="
-# dnf5 repoquery niri || true
-# dnf5 repoquery noctalia-shell || true
-# dnf5 repoquery kitty || true
-# dnf5 repoquery kanshi || true
-# dnf5 repoquery xwayland-satellite || true
-# dnf5 repoquery xdg-desktop-portal-gtk || true
-# dnf5 repoquery wl-clipboard || true
-# dnf5 repoquery cliphist || true
-# dnf5 repoquery brightnessctl || true
-# dnf5 repoquery fd-find || true
-# dnf5 repoquery fzf || true
-# dnf5 repoquery ripgrep || true
-# dnf5 repoquery swayidle || true
-echo "=== OS RELEASE ==="
-cat /etc/os-release || true
-
-echo "=== FEDORA RELEASE MACRO ==="
-rpm -E '%fedora' || true
-
-echo "=== ENABLED REPOS ==="
-dnf5 repolist --enabled || true
-
-echo "=== TERRA RELEASE PACKAGE ==="
-rpm -qi terra-release || true
-
-echo "=== NOCTALIA QUERY ==="
-dnf5 repoquery --available noctalia-shell || true
-
-echo "=== CLIPHIST QUERY ==="
-dnf5 repoquery --available cliphist || true
-
-dnf5 install -y \
+dnf5 install -y --setopt=install_weak_deps=False \
   niri \
   noctalia-shell \
   kitty \
@@ -68,7 +29,16 @@ dnf5 install -y \
   ripgrep \
   swayidle
 
-install -m0755 /ctx/kanata /usr/bin/kanata
+# --- kanata: fetch pinned release, verify sha256, install ---
+TMP="$(mktemp -d)"
+curl -fsSL -o "$TMP/kanata.zip" \
+  "https://github.com/jtroo/kanata/releases/download/${KANATA_VERSION}/linux-binaries-x64.zip"
+echo "${KANATA_SHA256}  $TMP/kanata.zip" | sha256sum -c -
+( cd "$TMP" && unzip -q kanata.zip )
+KANATA_BIN="$(find "$TMP" -maxdepth 3 -type f -name 'kanata*' ! -name '*.zip' -executable -print -quit \
+  || find "$TMP" -maxdepth 3 -type f -name 'kanata*' ! -name '*.zip' -print -quit)"
+install -m0755 "$KANATA_BIN" /usr/bin/kanata
+rm -rf "$TMP"
 
 groupadd --system uinput || true
 

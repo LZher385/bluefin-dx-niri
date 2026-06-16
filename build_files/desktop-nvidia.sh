@@ -1,4 +1,4 @@
 #!/bin/bash
-set -ouex pipefail
+set -euxo pipefail
 
 echo "Desktop Nvidia variant build steps go here"

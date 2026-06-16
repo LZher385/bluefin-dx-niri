@@ -1,9 +1,6 @@
 #!/bin/bash
-set -ouex pipefail
+set -euxo pipefail
 
-dnf5 repoquery fprintd || true
-dnf5 repoquery fprintd-pam || true
-
-dnf5 install -y \
+dnf5 install -y --setopt=install_weak_deps=False \
   fprintd \
   fprintd-pam

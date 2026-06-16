@@ -51,15 +51,8 @@ jobs:
     steps:
       - name: Prepare environment
         run: |
-          echo "IMAGE_REGISTRY=${IMAGE_REGISTRY,,}" >> ${GITHUB_ENV}
-          echo "IMAGE_NAME=${{ matrix.image_name }}" >> ${GITHUB_ENV}
-          echo "IMAGE_NAME=${{ matrix.image_name }}" | tr '[:upper:]' '[:lower:]' >> /dev/null
-          echo "IMAGE_NAME_LOWER=${{ matrix.image_name }}" | tr '[:upper:]' '[:lower:]' >> /dev/null
-          echo "IMAGE_NAME=${{ matrix.image_name }}" >> ${GITHUB_ENV}
-
-      - name: Lowercase image name
-        run: |
-          echo "IMAGE_NAME=$(echo '${{ matrix.image_name }}' | tr '[:upper:]' '[:lower:]')" >> ${GITHUB_ENV}
+          echo "IMAGE_REGISTRY=${IMAGE_REGISTRY,,}" >> $GITHUB_ENV
+          echo "IMAGE_NAME=$(echo '${{ matrix.image_name }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd

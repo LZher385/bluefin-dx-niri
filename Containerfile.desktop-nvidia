@@ -1,6 +1,5 @@
 FROM scratch AS ctx
 COPY build_files /
-COPY build_files/kanata /kanata
 
 FROM ghcr.io/ublue-os/bluefin-dx-nvidia-open:stable
 
