@@ -17,5 +17,20 @@
       "matchDepTypes": ["container"],
       "matchFileNames": [".github/workflows/**.yaml", ".github/workflows/**.yml"],
     },
-  ]
+  ],
+
+  // Track kanata upstream releases. The KANATA_SHA256 below it is not
+  // auto-updated — when CI fails the sha mismatch, common.sh prints the
+  // actual sha256; paste it into the Renovate PR to unblock the merge.
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^build_files/common\\.sh$"],
+      "matchStrings": [
+        "KANATA_VERSION=\"(?<currentValue>v[^\"]+)\""
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "jtroo/kanata",
+    },
+  ],
 }
