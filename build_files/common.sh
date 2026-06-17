@@ -17,6 +17,8 @@ dnf5 install -y --setopt=install_weak_deps=False \
   niri \
   noctalia-shell \
   kitty \
+  alacritty \
+  fuzzel \
   kanshi \
   xwayland-satellite \
   xdg-desktop-portal-gtk \
