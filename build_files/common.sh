@@ -4,14 +4,36 @@ set -euxo pipefail
 KANATA_VERSION="v1.11.0"
 KANATA_SHA256="d9f634afb4c7f078cc2aacf3998fd65b432d4d83296cc48a89f941525459b4e2"
 
+# Terra rotates its repo metadata in place: dnf reads repomd.xml, then 404s on
+# the primary.xml that repomd named, and the repo resolves to nothing. That has
+# killed whole builds on its own (2026-08-15, and the fw13 job on 2026-09-17).
+# Wiping the cached metadata and trying again clears it, so don't fail the image
+# over a repo that was mid-sync for a few seconds.
+retry() {
+  local attempt=1
+  local max=5
+  local delay
+  until "$@"; do
+    if [ "$attempt" -ge "$max" ]; then
+      echo "retry: '$*' still failing after $max attempts" >&2
+      return 1
+    fi
+    delay=$(( attempt * 10 ))
+    echo "retry: '$*' failed (attempt $attempt/$max); clearing metadata, retrying in ${delay}s" >&2
+    dnf5 clean metadata || true
+    sleep "$delay"
+    attempt=$(( attempt + 1 ))
+  done
+}
+
 # Add Terra only if not already present
 if ! dnf5 repolist --all | awk '{print $1}' | grep -qx terra; then
-  dnf5 install -y --nogpgcheck \
+  retry dnf5 install -y --nogpgcheck \
     --repofrompath="terra,https://repos.fyralabs.com/terra\$releasever" \
     terra-release
 fi
 
-dnf5 makecache --refresh -y
+retry dnf5 makecache --refresh -y
 
 # noctalia: Terra reorganized these packages on 2026-08-24 and the old
 # noctalia-shell name no longer exists. v5 is a native C++/OpenGL ES rewrite
@@ -20,7 +42,7 @@ dnf5 makecache --refresh -y
 # noctalia-legacy (Quickshell, `qs -c noctalia-shell`) so there's a fallback;
 # upstream marked v4 unsupported on 2026-08-29. The two don't conflict:
 # separate binaries, separate config files (v4 JSON, v5 TOML).
-dnf5 install -y --setopt=install_weak_deps=False \
+retry dnf5 install -y --setopt=install_weak_deps=False \
   niri \
   noctalia-nightly \
   noctalia-legacy \
