@@ -13,9 +13,17 @@ fi
 
 dnf5 makecache --refresh -y
 
+# noctalia: Terra reorganized these packages on 2026-08-24 and the old
+# noctalia-shell name no longer exists. v5 is a native C++/OpenGL ES rewrite
+# (binary `noctalia`) and is the maintained line, but Terra has no stable v5
+# spec -- only noctalia-nightly, which it bumps daily. v4 stays installed as
+# noctalia-legacy (Quickshell, `qs -c noctalia-shell`) so there's a fallback;
+# upstream marked v4 unsupported on 2026-08-29. The two don't conflict:
+# separate binaries, separate config files (v4 JSON, v5 TOML).
 dnf5 install -y --setopt=install_weak_deps=False \
   niri \
-  noctalia-shell \
+  noctalia-nightly \
+  noctalia-legacy \
   kitty \
   alacritty \
   fuzzel \
